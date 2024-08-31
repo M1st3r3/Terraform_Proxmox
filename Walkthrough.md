@@ -42,12 +42,14 @@ virt-customize -a focal-server-cloudimg-amd64.img --install qemu-guest-agent
 
 Creating a user for Terraform
 ```bash
-pveum role add terraform_role -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
+pveum role add TerraformProv -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt SDN.Use"
 
-pveum user add terraform_user@pve --password [Password]
+pveum user add terraform-prov@pve --password <password>
 
-pveum aclmod / -user terraform_user@pve -role terraform_role
+pveum aclmod / -user terraform-prov@pve -role TerraformProv
 ```
+
+Next for this user create an API Token from the web interface of proxmox & deselect privilege when creating it
 
 On the PC running Terraform export these variable
 ```bash
@@ -66,6 +68,9 @@ First we would need an provider.tf file
 provider.tf:
 ```bash
 terraform {
+
+  required_version = ">= 0.13.0"
+
   required_providers {
     proxmox = {
       source = "telmate/proxmox"
@@ -75,7 +80,11 @@ terraform {
 }
 
 provider "proxmox" {
-  pm_api_url = "https://your.proxmox.server:8006/api2/json"
+  pm_api_url = "https://192.168.1.29:8006/api2/json"
+  proxmox_api_token_id = "terraform-prov@pve!terraform"
+  proxmox_api_token_secret = "786425e0-00f4-437e-95bc-6fd6a1786921"
+
+  pm_tls_insecure = true
 }
 ```
 
