@@ -1,4 +1,6 @@
-Put the interface of the PC running proxmox in Promisc mode: 
+# Physical PC preparation
+
+Put the interface of the PC running proxmox in Promisc mode if running linux: 
 
 ```bash
 sudo chmod a+rw /dev/vmnet0
@@ -14,28 +16,38 @@ Disable :
 ifconfig enp2s0 -promisc
 ```
 
+---
 
+# Proxmox server preparation
 
+Into the ProxMox Server you need to install libguestfs-tools:
+```bash
+apt update -y && apt install libguestfs-tools -y
+```
 
-SET interface to promiscous mode on vSwitch & Physical NIC
+Create a directory where you will stock Cloud-Images to propose for template
+```bash
+mkdir cloud-image
+#Ubuntu Server cloud image
+wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
+#Debian cloud image
+wget https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-generic-amd64.qcow2
+```
 
-sudo chmod a+rw /dev/vmnet0
+Preinstalling qemu-guest-agent into the cloud image
+```bash
+virt-customize -a debian-11-generic-amd64.qcow2 --install qemu-guest-agent
+virt-customize -a focal-server-cloudimg-amd64.img --install qemu-guest-agent
+```
 
-Enable :sudo ifconfig enp2s0 promisc
+Creating a user for Terraform
+```bash
+pveum role add terraform_role -privs "Datastore.AllocateSpace Datastore.Audit Pool.Allocate Sys.Audit Sys.Console Sys.Modify VM.Allocate VM.Audit VM.Clone VM.Config.CDROM VM.Config.Cloudinit VM.Config.CPU VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Migrate VM.Monitor VM.PowerMgmt"
 
-Disable : ifconfig eth0 -promisc
+pveum user add terraform_user@pve --password [Password]
 
-####################################
-
-/etc/sysctl.conf
-
-net.ipv4.ip_forward = 1
-net.ipv6.conf.all.forwarding = 0
-net.bridge.bridge-nf-call-ip6tables = 0
-
-####################################
-
-
+pveum aclmod / -user terraform_user@pve -role terraform_role
+```
 
 On the proxmox server cli
 
