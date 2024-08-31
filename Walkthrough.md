@@ -51,12 +51,6 @@ pveum aclmod / -user terraform-prov@pve -role TerraformProv
 
 Next for this user create an API Token from the web interface of proxmox & deselect privilege when creating it
 
-On the PC running Terraform export these variable
-```bash
-export PM_USER="terraform_user@pve"
-export PM_PASS="[Password]"
-```
-
 ---
 
 # First Terraform action
@@ -65,7 +59,7 @@ Now that everything is setup you will need to create multiple file for Terraform
 
 First we would need an provider.tf file 
 
-**Note : Normally we would never write the TokenID,TokenSecret,ApiURL in the provider.tf file**
+**Note : Normally we would never write the TokenID,TokenSecret,ApiURL in the provider.tf file. For this im using the root user and not the terraform user**
 
 provider.tf:
 ```bash
@@ -89,6 +83,14 @@ provider "proxmox" {
   pm_tls_insecure = true
 }
 ```
+
+After you should run :
+```bash
+terraform init
+```
+
+To see if everything is working good , for me it was not working then I had to compile from source using the official doc :
+https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/installation.md
 
 The variables.tfvars will be created automatically in the bash script we will see that afterward
 
