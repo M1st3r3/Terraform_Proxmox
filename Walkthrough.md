@@ -10,7 +10,7 @@ sudo ifconfig enp2s0 promisc
 ```
 
 Disable :
-````bash
+```bash
 ifconfig enp2s0 -promisc
 ```
 
