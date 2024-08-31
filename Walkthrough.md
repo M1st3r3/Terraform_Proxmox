@@ -1,3 +1,22 @@
+Put the interface of the PC running proxmox in Promisc mode: 
+
+```bash
+sudo chmod a+rw /dev/vmnet0
+```
+
+Enable :
+```bash
+sudo ifconfig enp2s0 promisc
+```
+
+Disable :
+````bash
+ifconfig enp2s0 -promisc
+```
+
+
+
+
 SET interface to promiscous mode on vSwitch & Physical NIC
 
 sudo chmod a+rw /dev/vmnet0
