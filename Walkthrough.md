@@ -1,5 +1,8 @@
 # Physical PC preparation
 
+Installing Terraform:
+https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+
 Put the interface of the PC running proxmox in Promisc mode if running linux: 
 
 ```bash
@@ -70,7 +73,7 @@ terraform {
   required_providers {
     proxmox = {
       source = "telmate/proxmox"
-      version = "2.9.14"
+      version = "3.0.1-rc3"
     }
   }
 }
@@ -94,23 +97,56 @@ https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/in
 
 The variables.tfvars will be created automatically in the bash script we will see that afterward
 
-```
-provider "proxmox" {
- pm_api_url   = "https://your-proxmox-host:8006/api2/json"
- pm_user      = "blog_example"
- pm_password  = "your-api-key"
- pm_tls_insecure = true
+As my project is to automate as much as possible the process of provising VM to be used as template and Copy of said template I'll start creating my bash script that will be used .
+
+First thing the user would have to already have set up Terraform providers
+
+Script:
+```bash
+#!/bin/bash
+
+# Function to create a VM template
+create_vm_template() {
+    echo "Creating VM template..."
+    read -p "Enter the template name: " template_name
+    read -p "Enter the base cloud image path: " base_image
+    read -p "Enter the VM ID: " vm_id
+
+    # To Implement
 }
 
-resource "proxmox_vm_qemu" "my_vm" {
- name       = "my-vm"
- target_node = "pve"
- clone      = "ubuntu-template"
- storage    = "local-lvm"
- cores      = 2
- memory     = 2048
+# Function to copy VMs from a template
+copy_from_template() {
+    echo "Copying VMs from template..."
+    read -p "Enter the template name: " template_name
+    read -p "Enter the number of VMs to create: " vm_count
+    read -p "Enter the starting VM ID: " start_vm_id
+
+    # To Implement
 }
+
+# Main script execution
+echo "Select an option:"
+echo "1) Create VM Template"
+echo "2) Copy from Template"
+read -p "Enter your choice (1 or 2): " choice
+
+case $choice in
+    1)
+        create_vm_template
+        ;;
+    2)
+        copy_from_template
+        ;;
+    *)
+        echo "Invalid option. Please run the script again and choose either 1 or 2."
+        exit 1
+        ;;
+esac
+
+echo "Operation completed."
 ```
+
 
 ---
 
