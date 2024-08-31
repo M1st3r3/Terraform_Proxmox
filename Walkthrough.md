@@ -65,6 +65,8 @@ Now that everything is setup you will need to create multiple file for Terraform
 
 First we would need an provider.tf file 
 
+**Note : Normally we would never write the TokenID,TokenSecret,ApiURL in the provider.tf file**
+
 provider.tf:
 ```bash
 terraform {
