@@ -49,6 +49,11 @@ pveum user add terraform_user@pve --password [Password]
 pveum aclmod / -user terraform_user@pve -role terraform_role
 ```
 
+
+
+---
+
+
 On the proxmox server cli
 
 wget https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img
