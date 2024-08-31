@@ -49,6 +49,38 @@ pveum user add terraform_user@pve --password [Password]
 pveum aclmod / -user terraform_user@pve -role terraform_role
 ```
 
+On the PC running Terraform export these variable
+```bash
+export PM_USER="terraform_user@pve"
+export PM_PASS="[Password]"
+```
+
+---
+
+# First Terraform action
+
+Now that everything is setup you will need to create multiple file for Terraform to work
+
+First we would need an provider.tf file 
+
+provider.tf:
+```bash
+terraform {
+  required_providers {
+    proxmox = {
+      source = "telmate/proxmox"
+      version = "2.9.14"
+    }
+  }
+}
+
+provider "proxmox" {
+  pm_api_url = "https://your.proxmox.server:8006/api2/json"
+}
+```
+
+The variables.tfvars will be created automatically in the bash script we will see that afterward
+
 
 
 ---
