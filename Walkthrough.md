@@ -111,7 +111,7 @@ As my project is to automate as much as possible the process of provising VM to 
 
 To create a vm template using the cloud-image of ubuntu we will use a bash script:
 
-**NEED {CORES NUMBER} , {VLAN TAG IF NECESSARY} , {PROXMOX NODE CREATION} , { APPS TO INSTALL} , {DISK SIZE} **
+**NEED {CORES NUMBER} , {VLAN TAG IF NECESSARY} , {PROXMOX NODE CREATION} , { APPS TO INSTALL} , {DISK SIZE}**
 ```bash
 #!/bin/bash
 
