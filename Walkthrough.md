@@ -110,6 +110,8 @@ The variables.tfvars will be created automatically in the bash script we will se
 As my project is to automate as much as possible the process of provising VM to be used as template and Copy of said template I'll start creating my bash script that will be used to create cloud Image into template .
 
 To create a vm template using the cloud-image of ubuntu we will use a bash script:
+
+**NEED {CORES NUMBER} , {VLAN TAG IF NECESSARY} , {PROXMOX NODE CREATION} , { APPS TO INSTALL} , {DISK SIZE} **
 ```bash
 #!/bin/bash
 
