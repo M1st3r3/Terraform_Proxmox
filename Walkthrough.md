@@ -103,12 +103,47 @@ https://github.com/Telmate/terraform-provider-proxmox/blob/master/docs/guides/in
 
 The variables.tfvars will be created automatically in the bash script we will see that afterward
 
-As my project is to automate as much as possible the process of provising VM to be used as template and Copy of said template I'll start creating my bash script that will be used .
+---
 
-This is a Terraform file that will create a vm using the cloud-image of ubuntu
+# Cloud Image into Template
+
+As my project is to automate as much as possible the process of provising VM to be used as template and Copy of said template I'll start creating my bash script that will be used to create cloud Image into template .
+
+To create a vm template using the cloud-image of ubuntu we will use a bash script:
+```bash
+read -p "Enter the name of the VM cloud image to create a template from: " template_cloud_image
+read -p "Enter the MB of RAM: " template_ram
+read -p "Enter the VMID that you want to assign to this template: " template_vmid
+read -p "Enter the name of the template: " template_name
+read -p "Enter the Network Interface Name (ex:vmbr0): " template_netw
+read -p "Enter the name of the stockage location (ex:local-lvm) " template_stock_loc
+
+
+ssh root@192.168.1.40 "qm create $template_vmid --memory $template_ram --name $template_name --net0 virtio,bridge=$template_netw ;qm importdisk $template_vmid $template_cloud_image $template_stock_loc; qm importdisk $template_vmid $template_cloud_image $template_stock_loc; qm set $template_vmid --scsihw virtio-scsi-pci --scsi0 $template_stock_loc:vm-"$template_vmid"-disk-0; qm set $template_vmid --ide2 $template_stock_loc:cloudinit; qm set $template_vmid --boot c --bootdisk scsi0; qm set $template_vmid --serial0 socket --vga serial0; qm set $template_vmid --agent enabled=1; qm template $template_vmid"
+```
 
 ```bash
+MAGE CREATION AND CONVERT TO TEMPLATE
 
+Install on different cloud image:
+
+virt-customize -a [nom_image] --install qemu-guest-agent
+
+Use this command to start creating the image for the template: qm create [VMID] --memory [RAM] --name [ubuntu-cloud] --net0 virtio,bridge=[vmbr0-INT]
+
+Import the disk image into the storage : qm importdisk 8000 focal-server-cloudimg-amd64.img [local-lvm - location ]
+
+qm set 8000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-8000-disk-0
+
+qm set 8000 --ide2 local-lvm:cloudinit
+
+qm set 8000 --boot c --bootdisk scsi0
+
+qm set 8000 --serial0 socket --vga serial0
+
+Enable qemu-guest-agent qm set [VMID] --agent enabled=1
+
+Convert Vm created to template: qm template [VMID
 ```
 
 
