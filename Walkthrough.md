@@ -63,6 +63,7 @@ Now that everything is setup you will need to create multiple file for Terraform
 First we would need an provider.tf file 
 
 **Note : Normally we would never write the TokenID,TokenSecret,ApiURL in the provider.tf file. For this im using the root user and not the terraform user**
+**I used Terraform on Windows as well and using Proxmox version 7.4 as I could not run terraform init from my kubuntu machine**
 
 provider.tf:
 ```bash
