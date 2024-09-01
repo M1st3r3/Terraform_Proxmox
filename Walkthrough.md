@@ -111,15 +111,27 @@ As my project is to automate as much as possible the process of provising VM to 
 
 To create a vm template using the cloud-image of ubuntu we will use a bash script:
 ```bash
+#!/bin/bash
+
+# Read user input
 read -p "Enter the name of the VM cloud image to create a template from: " template_cloud_image
 read -p "Enter the MB of RAM: " template_ram
 read -p "Enter the VMID that you want to assign to this template: " template_vmid
 read -p "Enter the name of the template: " template_name
-read -p "Enter the Network Interface Name (ex:vmbr0): " template_netw
-read -p "Enter the name of the stockage location (ex:local-lvm) " template_stock_loc
+read -p "Enter the Network Interface Name (e.g., vmbr0): " template_netw
+read -p "Enter the name of the storage location (e.g., local-lvm): " template_stock_loc
 
-
-ssh root@192.168.1.40 "qm create $template_vmid --memory $template_ram --name $template_name --net0 virtio,bridge=$template_netw ;qm importdisk $template_vmid $template_cloud_image $template_stock_loc; qm importdisk $template_vmid $template_cloud_image $template_stock_loc; qm set $template_vmid --scsihw virtio-scsi-pci --scsi0 $template_stock_loc:vm-"$template_vmid"-disk-0; qm set $template_vmid --ide2 $template_stock_loc:cloudinit; qm set $template_vmid --boot c --bootdisk scsi0; qm set $template_vmid --serial0 socket --vga serial0; qm set $template_vmid --agent enabled=1; qm template $template_vmid"
+# Run Proxmox commands via SSH
+ssh root@192.168.1.40 << EOF
+  qm create $template_vmid --memory $template_ram --name $template_name --net0 virtio,bridge=$template_netw
+  qm importdisk $template_vmid $template_cloud_image $template_stock_loc
+  qm set $template_vmid --scsihw virtio-scsi-pci --scsi0 $template_stock_loc:vm-${template_vmid}-disk-0
+  qm set $template_vmid --ide2 $template_stock_loc:cloudinit
+  qm set $template_vmid --boot c --bootdisk scsi0
+  qm set $template_vmid --serial0 socket --vga serial0
+  qm set $template_vmid --agent enabled=1
+  qm template $template_vmid
+EOF
 ```
 
 ```bash
