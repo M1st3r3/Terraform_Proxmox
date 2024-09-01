@@ -65,6 +65,8 @@ First we would need an provider.tf file
 **Note : Normally we would never write the TokenID,TokenSecret,ApiURL in the provider.tf file. For this im using the root user and not the terraform user**
 **I used Terraform on Windows as well and using Proxmox version 7.4 as I could not run terraform init from my kubuntu machine**
 
+Windows Terraform download : https://developer.hashicorp.com/terraform/install
+
 provider.tf:
 ```bash
 terraform {
@@ -84,6 +86,9 @@ provider "proxmox" {
   proxmox_api_token_id = "root@pam!root"
   proxmox_api_token_secret = "15489609-3cfe-4691-9b8a-e1cbb30901fa"
 
+  pm_user       = "root@pam"
+  pm_password   = "[password]"
+
   pm_tls_insecure = true
 }
 ```
@@ -100,75 +105,12 @@ The variables.tfvars will be created automatically in the bash script we will se
 
 As my project is to automate as much as possible the process of provising VM to be used as template and Copy of said template I'll start creating my bash script that will be used .
 
-First thing the user would have to already have set up Terraform providers
-
-Script:
-```bash
-#!/bin/bash
-
-# Function to create a VM template
-create_vm_template() {
-    echo "Creating VM template..."
-    read -p "Enter the template name: " template_name
-    read -p "Enter the base cloud image path: " base_image
-    read -p "Enter the VM ID: " vm_id
-    read -p "Enter the number of CPU cores: " cpu_cores
-    read -p "Enter the amount of RAM (in MB): " ram_size
-    read -p "Enter the bridge interface name: " bridge_interface
-    read -p "Enter the VLAN tag (if any, or leave blank): " vlan_tag
-    read -p "Enter the number of disks: " disk_count
-
-    # Loop to collect disk sizes
-    declare -a disk_sizes
-    for ((i=1; i<=disk_count; i++)); do
-        read -p "Enter the size of disk $i (in GB): " disk_size
-        disk_sizes+=("$disk_size")
-    done
-
-    read -p "Enter the Proxmox node for creation: " proxmox_node
-    read -p "Enter the Proxmox storage location: " storage_location
-    # To Implement
-}
-
-# Function to copy VMs from a template
-copy_from_template() {
-    echo "Copying VMs from template..."
-    read -p "Enter the template name: " template_name
-    read -p "Enter the number of VMs to create: " vm_count
-    read -p "Enter the VM ID of the template: " template_vm_id
-    read -p "Enter the starting VM ID: " start_vm_id
-
-    # To Implement
-}
-
-# Main script execution
-echo "Select an option:"
-echo "1) Create VM Template"
-echo "2) Copy from Template"
-read -p "Enter your choice (1 or 2): " choice
-
-case $choice in
-    1)
-        create_vm_template
-        ;;
-    2)
-        copy_from_template
-        ;;
-    *)
-        echo "Invalid option. Please run the script again and choose either 1 or 2."
-        exit 1
-        ;;
-esac
-
-echo "Operation completed."
-```
-
-Now we will create 2 different directory that will have our different script
+This is a Terraform file that will create a vm using the cloud-image of ubuntu
 
 ```bash
-mkdir create_vm_template
-mkdir copy_vm_template
+
 ```
+
 
 ---
 
@@ -177,90 +119,8 @@ mkdir copy_vm_template
 We will start by doing the create_vm_template, we will have a main.tf file and a var.tfvars and dont forget your provider.tf
 
 main.tf
-```
-# Proxmox provider configuration
-provider "proxmox" {
-  pm_api_url      = "https://proxmox.example.com:8006/api2/json"
-  pm_user         = "root@pam"
-  pm_password     = var.proxmox_password
-  pm_tls_insecure = true
-}
 
-# Variable definitions
-variable "template_name" {}
-variable "base_image" {}
-variable "start_vm_id" {}
-variable "vm_count" {}
-variable "cpu_cores" {}
-variable "ram_size" {}
-variable "bridge_interface" {}
-variable "vlan_tag" {
-  default = ""
-}
-variable "disk_count" {}
-variable "disk_sizes" {
-  type = list(string)
-}
-variable "proxmox_node" {}
-variable "storage_location" {}
-
-# Resource block for creating a VM template
-resource "proxmox_vm_qemu" "vm_template" {
-  name         = var.template_name
-  vmid         = var.start_vm_id
-  target_node  = var.proxmox_node
-  agent        = 1
-  cores        = var.cpu_cores
-  memory       = var.ram_size
-  bootdisk     = "scsi0"
-
-  network {
-    model  = "virtio"
-    bridge = var.bridge_interface
-    tag    = var.vlan_tag != "" ? var.vlan_tag : null
-  }
-
-  dynamic "disk" {
-    for_each = range(var.disk_count)
-    content {
-      id     = disk.value
-      size   = "${var.disk_sizes[disk.value]}G"
-      storage = var.storage_location
-      type   = "scsi"
-    }
-  }
-
-  clone {
-    base_template = var.base_image
-  }
-}
-
-# Resource block for copying VMs from a template
-resource "proxmox_vm_qemu" "vm_clone" {
-  count        = var.vm_count
-  name         = "${var.template_name}-clone-${count.index + 1}"
-  vmid         = var.start_vm_id + count.index
-  target_node  = var.proxmox_node
-  agent        = 1
-  cores        = var.cpu_cores
-  memory       = var.ram_size
-
-  network {
-    model  = "virtio"
-    bridge = var.bridge_interface
-    tag    = var.vlan_tag != "" ? var.vlan_tag : null
-  }
-
-  disk {
-    size   = "${var.disk_sizes[0]}G"
-    storage = var.storage_location
-    type   = "scsi"
-  }
-
-  clone {
-    base_template = proxmox_vm_qemu.vm_template.name
-  }
-}
+---
 
 
 ---
