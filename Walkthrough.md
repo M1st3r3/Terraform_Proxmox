@@ -114,6 +114,7 @@ To create a vm template using the cloud-image of ubuntu we will use a bash scrip
 #!/bin/bash
 
 # Read user input
+read -p "Enter the IP of the proxmox node to install the cloud image template too" template_node
 read -p "Enter the name of the VM cloud image to create a template from: " template_cloud_image
 read -p "Enter the MB of RAM: " template_ram
 read -p "Enter the VMID that you want to assign to this template: " template_vmid
@@ -122,7 +123,7 @@ read -p "Enter the Network Interface Name (e.g., vmbr0): " template_netw
 read -p "Enter the name of the storage location (e.g., local-lvm): " template_stock_loc
 
 # Run Proxmox commands via SSH
-ssh root@192.168.1.40 << EOF
+ssh root@$template_node << EOF
   qm create $template_vmid --memory $template_ram --name $template_name --net0 virtio,bridge=$template_netw
   qm importdisk $template_vmid $template_cloud_image $template_stock_loc
   qm set $template_vmid --scsihw virtio-scsi-pci --scsi0 $template_stock_loc:vm-${template_vmid}-disk-0
@@ -132,6 +133,7 @@ ssh root@192.168.1.40 << EOF
   qm set $template_vmid --agent enabled=1
   qm template $template_vmid
 EOF
+
 ```
 
 ```bash
